@@ -18,6 +18,15 @@ including the official local sign name (e.g. *Zeichen 205 – Vorfahrt gewähren
 |---|---|
 | ![German signs](docs/germany.png) | ![Japanese signs](docs/japan.png) |
 
+## Scenario illustrations
+
+Every scenario has a top-down illustration. Before you answer it shows the situation (left);
+afterwards it shows the correct behaviour (right): paths, who goes first, distances, ✓ / ✗.
+
+| Germany | Japan |
+|---|---|
+| ![German scenes](docs/germany_scenes.png) | ![Japanese scenes](docs/japan_scenes.png) |
+
 ## Features
 
 - **Country selection** at startup – German or Japanese signs and rules.
@@ -25,7 +34,8 @@ including the official local sign name (e.g. *Zeichen 205 – Vorfahrt gewähren
 - **Traffic scenarios quiz** – right of way, Autobahn emergency corridor, Japanese railway crossings,
   turning on red, alcohol limits, licence requirements and more.
 - **Review mistakes** – every wrong answer is saved; answer it correctly later to clear it.
-- **Browse all signs** – a grid of every sign with its meaning, for learning without pressure.
+- **How to behave** – every scenario with its illustration, the right behaviour and the reason.
+- **All signs** – a grid of every sign with its meaning, for learning without pressure.
 - Best score per category is remembered.
 
 All signs are drawn in code (`app/src/main/java/com/crashcourse/app/signs/SignKit.kt`) as simplified
@@ -70,6 +80,7 @@ app/src/main/java/com/crashcourse/app/
 │   ├── JapanScenarios.kt     # 30 Japanese scenarios
 │   └── ProgressStore.kt      # best scores + mistakes (SharedPreferences)
 ├── signs/SignKit.kt          # drawing toolkit for all signs
+├── scenes/                   # top-down scenario illustrations (SceneKit + per-country scenes)
 ├── update/Updater.kt         # checks GitHub releases, downloads + installs updates
 └── ui/                       # Jetpack Compose screens + theme
 ```

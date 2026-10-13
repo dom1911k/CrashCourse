@@ -1,5 +1,6 @@
 package com.crashcourse.app.data
 
+import com.crashcourse.app.scenes.SceneDraw
 import com.crashcourse.app.signs.SignDraw
 
 enum class Country(val label: String, val flag: String, val drivesOn: String) {
@@ -26,6 +27,8 @@ data class Question(
     val sign: SignDraw? = null,
     /** Official name in the local language, shown after answering. */
     val localName: String? = null,
+    /** Top-down illustration of the situation (scenario questions). */
+    val scene: SceneDraw? = null,
 ) {
     init {
         require(wrong.size == 3) { "Question $id needs exactly 3 wrong answers" }

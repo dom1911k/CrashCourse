@@ -1,10 +1,12 @@
 package com.crashcourse.app.data
 
+import com.crashcourse.app.scenes.GermanyScenes
+
 /** Common everyday driving situations in Germany (StVO). */
 object GermanyScenarios {
 
     private fun q(id: String, prompt: String, correct: String, wrong: List<String>, explanation: String) =
-        Question("de_c_$id", prompt, correct, wrong, explanation)
+        Question("de_c_$id", prompt, correct, wrong, explanation, scene = GermanyScenes.byId[id])
 
     val all: List<Question> = listOf(
         q(

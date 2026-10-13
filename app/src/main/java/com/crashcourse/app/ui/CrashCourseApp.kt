@@ -65,6 +65,8 @@ import com.crashcourse.app.data.Question
 import com.crashcourse.app.data.QuestionBank
 import com.crashcourse.app.signs.SignDraw
 import com.crashcourse.app.signs.SignImage
+import com.crashcourse.app.scenes.SceneImage
+import androidx.compose.ui.draw.clip
 
 private const val QUICK_ROUND = 10
 
@@ -72,6 +74,7 @@ private sealed interface Screen {
     data object CountryPick : Screen
     data class Menu(val country: Country) : Screen
     data class Browse(val country: Country) : Screen
+    data class Guide(val country: Country) : Screen
 
     class Quiz(
         val country: Country,
@@ -131,9 +134,11 @@ fun CrashCourseApp(store: ProgressStore) {
                     if (qs.isNotEmpty()) push(Screen.Quiz(s.country, "Review mistakes", qs, null))
                 },
                 onBrowse = { push(Screen.Browse(s.country)) },
+                onGuide = { push(Screen.Guide(s.country)) },
             )
 
             is Screen.Browse -> BrowseScreen(s.country, onBack = ::pop)
+            is Screen.Guide -> GuideScreen(s.country, onBack = ::pop)
 
             is Screen.Quiz -> QuizScreen(
                 screen = s,
@@ -271,6 +276,7 @@ private fun MenuScreen(
     onStart: (Category, quick: Boolean) -> Unit,
     onReview: () -> Unit,
     onBrowse: () -> Unit,
+    onGuide: () -> Unit,
 ) {
     var refresh by remember { mutableIntStateOf(0) }
     var confirmReset by remember { mutableStateOf(false) }
@@ -325,8 +331,13 @@ private fun MenuScreen(
                 }
             }
 
-            OutlinedButton(onClick = onBrowse, modifier = Modifier.fillMaxWidth()) {
-                Text("Browse all signs")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onGuide, modifier = Modifier.weight(1f)) {
+                    Text("How to behave")
+                }
+                OutlinedButton(onClick = onBrowse, modifier = Modifier.weight(1f)) {
+                    Text("All signs")
+                }
             }
             TextButton(onClick = { confirmReset = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Text("Reset progress for ${country.label}")
@@ -401,6 +412,17 @@ private fun QuizScreen(
                     Modifier
                         .size(200.dp)
                         .align(Alignment.CenterHorizontally),
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+            question.scene?.let { scene ->
+                // Before answering it shows the situation; afterwards the correct behaviour.
+                SceneImage(
+                    scene,
+                    reveal = chosen != null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp)),
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -574,6 +596,10 @@ private fun ResultsScreen(
                             SignPlate(it, Modifier.size(64.dp), padding = 4)
                             Spacer(Modifier.width(12.dp))
                         }
+                        a.question.scene?.let {
+                            SceneImage(it, reveal = true, modifier = Modifier.width(110.dp).clip(RoundedCornerShape(8.dp)))
+                            Spacer(Modifier.width(12.dp))
+                        }
                         Column {
                             if (a.question.sign == null) {
                                 Text(a.question.prompt, style = MaterialTheme.typography.bodyMedium)
@@ -648,5 +674,56 @@ private fun BrowseScreen(country: Country, onBack: () -> Unit) {
                 }
             },
         )
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Behaviour guide (all scenarios, with the answer shown)
+// ---------------------------------------------------------------------------
+
+@Composable
+private fun GuideScreen(country: Country, onBack: () -> Unit) {
+    val scenarios = remember(country) { QuestionBank.questions(country, Category.SCENARIOS) }
+    var showSituation by remember { mutableStateOf<String?>(null) }
+
+    AppScaffold("${country.flag}  How to behave", onBack) { padding ->
+        LazyColumn(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Text(
+                    "Every situation with the right behaviour. Tap a picture to switch between the situation and the solution.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            items(scenarios, key = { it.id }) { q ->
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp)) {
+                        q.scene?.let {
+                            SceneImage(
+                                it,
+                                reveal = showSituation != q.id,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { showSituation = if (showSituation == q.id) null else q.id },
+                            )
+                            Spacer(Modifier.height(10.dp))
+                        }
+                        Text(q.prompt, style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(6.dp))
+                        Text("→ ${q.correct}", color = CorrectGreen, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.height(4.dp))
+                        Text(q.explanation, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+            item { Spacer(Modifier.height(24.dp)) }
+        }
     }
 }

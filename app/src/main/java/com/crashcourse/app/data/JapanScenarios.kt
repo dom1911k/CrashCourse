@@ -1,10 +1,12 @@
 package com.crashcourse.app.data
 
+import com.crashcourse.app.scenes.JapanScenes
+
 /** Common everyday driving situations in Japan (道路交通法). */
 object JapanScenarios {
 
     private fun q(id: String, prompt: String, correct: String, wrong: List<String>, explanation: String) =
-        Question("jp_c_$id", prompt, correct, wrong, explanation)
+        Question("jp_c_$id", prompt, correct, wrong, explanation, scene = JapanScenes.byId[id])
 
     val all: List<Question> = listOf(
         q(

@@ -34,10 +34,19 @@ but not pixel-exact.
 
 ## Getting the APK
 
-**From GitHub Actions (no setup needed):** every push runs the *Build APK* workflow.
-Open the latest run under the repository's *Actions* tab and download the `CrashCourse-debug-apk`
-artifact. Unzip it, copy `app-debug.apk` to your phone and open it
-(you'll need to allow installing apps from unknown sources).
+**First install:** open the repository's
+[Releases page](https://github.com/dom1911k/CrashCourse/releases/latest), download
+`CrashCourse.apk` on your phone and open it (allow installing apps from your browser when asked).
+
+**Updating:** open the app – it checks for a newer build on startup and shows an
+*Update available* card. You can also tap **Check for updates** at the bottom of the start screen.
+Tap *Update now*, and Android's installer opens. The first time, Android asks you to allow
+CrashCourse to install apps.
+
+How it works: every push to the default branch runs the *Build APK* workflow, which builds the APK
+and publishes it as a GitHub release tagged `build-<run number>`. The app's version code is that
+same run number, so the app knows when a release is newer. All builds are signed with the same key
+(`app/signing.keystore`), so Android accepts them as updates.
 
 **With Android Studio:** open the project folder and press *Run*.
 
@@ -61,6 +70,7 @@ app/src/main/java/com/crashcourse/app/
 │   ├── JapanScenarios.kt     # 30 Japanese scenarios
 │   └── ProgressStore.kt      # best scores + mistakes (SharedPreferences)
 ├── signs/SignKit.kt          # drawing toolkit for all signs
+├── update/Updater.kt         # checks GitHub releases, downloads + installs updates
 └── ui/                       # Jetpack Compose screens + theme
 ```
 

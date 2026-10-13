@@ -44,6 +44,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -95,6 +97,9 @@ private data class Answer(val question: Question, val chosen: String) {
 fun CrashCourseApp(store: ProgressStore) {
     val backStack = remember { mutableStateListOf<Screen>(Screen.CountryPick) }
     val current = backStack.last()
+    val scope = rememberCoroutineScope()
+    val updates = remember { UpdateController(scope) }
+    LaunchedEffect(Unit) { updates.check(silent = true) }
 
     fun push(s: Screen) = backStack.add(s)
     fun pop() {
@@ -109,7 +114,7 @@ fun CrashCourseApp(store: ProgressStore) {
     // Re-read progress whenever the screen changes so the menu shows fresh numbers.
     key(current) {
         when (val s = current) {
-            Screen.CountryPick -> CountryPickScreen { push(Screen.Menu(it)) }
+            Screen.CountryPick -> CountryPickScreen(updates) { push(Screen.Menu(it)) }
 
             is Screen.Menu -> MenuScreen(
                 country = s.country,
@@ -202,7 +207,7 @@ private fun SignPlate(draw: SignDraw, modifier: Modifier = Modifier, padding: In
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryPickScreen(onPick: (Country) -> Unit) {
+private fun CountryPickScreen(updates: UpdateController, onPick: (Country) -> Unit) {
     Scaffold { padding ->
         Column(
             Modifier
@@ -247,6 +252,9 @@ private fun CountryPickScreen(onPick: (Country) -> Unit) {
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
+            UpdateSection(updates)
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
